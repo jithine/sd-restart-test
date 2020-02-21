@@ -1,0 +1,32 @@
+shared:
+    image: node:12
+
+parameters:
+    user: "jithine"
+    region: "us-west-1"
+    az:
+        value: "1"
+        description: "default availability zone"
+
+jobs:
+    pre-main-1:
+        requires: [~pr, ~commit]
+        steps:
+            - step1: 'echo "Region: $(meta get parameters.region.value)"'
+            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
+            - fail: |
+                if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
+    pre-main-2:
+        requires: [~pr, ~commit]
+        steps:
+            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
+            - step1: 'echo "Region: $(meta get parameters.region.value)"'
+            - fail: |
+                if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
+    main:
+        requires: [pre-main-1, pre-main-2]
+        steps:
+            - step1: 'echo "Region: $(meta get parameters.region.value)"'
+            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
+            - read-log: |
+                curl -X GET --header 'Accept: application/json' "${SD_BUILD_URL}/steps/step1/logs" --header "Authorization: Bearer ${SD_TOKEN}"
