@@ -14,13 +14,12 @@ jobs:
         steps:
             - step1: 'echo "Region: $(meta get parameters.region.value)"'
             - step2: 'echo "AZ: $(meta get parameters.az.value)"'
-            - fail: |
-                if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
     pre-main-2:
         requires: [~pr, ~commit]
         steps:
             - step2: 'echo "AZ: $(meta get parameters.az.value)"'
             - step1: 'echo "Region: $(meta get parameters.region.value)"'
+            - sleep: sleep 10
             - fail: |
                 if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
     main:
