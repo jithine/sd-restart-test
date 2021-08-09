@@ -1,5 +1,5 @@
-shared:
-    image: node:12
+annotations:
+  screwdriver.cd/chainPR : true
 
 parameters:
     user: "jithine"
@@ -8,24 +8,51 @@ parameters:
         value: "1"
         description: "default availability zones"
 
+shared:
+  image: node:12
+  steps:
+        - nothing: echo 'nothing'
+  environment:
+    USER_SHELL_BIN: "/bin/bash"
+    SD_ZIP_ARTIFACTS: false
+    SD_COVERAGE_PLUGIN_ENABLED: false
+
+  annotations:
+    screwdriver.cd/collapseBuilds: false
+    e2e_test_ui: &e2e_test_ui
+      requires: [ component_build_deploy_publish ]
+
 jobs:
-    pre-main-1:
-        requires: [~pr, ~commit]
-        steps:
-            - step1: 'echo "Region: $(meta get parameters.region.value)"'
-            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
-    pre-main-2:
-        requires: [~pr, ~commit]
-        steps:
-            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
-            - step1: 'echo "Region: $(meta get parameters.region.value)"'
-            - sleep: sleep 10
-            - fail: |
-                if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
-    main:
-        requires: [pre-main-1, pre-main-2]
-        steps:
-            - step1: 'echo "Region: $(meta get parameters.region.value)"'
-            - step2: 'echo "AZ: $(meta get parameters.az.value)"'
-            - read-log: |
-                curl -X GET --header 'Accept: application/json' "${SD_BUILD_URL}/steps/step1/logs" --header "Authorization: Bearer ${SD_TOKEN}"
+  hotfix_release:
+    steps:
+      - nothing: |
+          echo "Setting meta data variable 'hotfix_release' to 'true'"
+          meta set hotfix_release "true"
+
+  lint:
+    requires: [~commit, ~hotfix_release]
+
+  build_test:
+    environment:
+      SD_COVERAGE_PLUGIN_ENABLED: true
+    requires: [~commit, ~hotfix_release]
+
+  component_build_deploy_publish:
+    requires: [~commit, hotfix_release]
+
+  bucket_1_ui:
+    steps:
+        - fail-maybe: if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
+
+  bucket_2_ui:
+    <<: *e2e_test_ui
+
+  bucket_3_ui:
+    <<: *e2e_test_ui
+
+  bucket_4_ui:
+    <<: *e2e_test_ui
+
+  # Certifcation section
+  certify_tag:
+    requires: [bucket_1_ui, bucket_2_ui, bucket_3_ui, bucket_4_ui, lint, build_test]
