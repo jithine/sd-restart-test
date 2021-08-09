@@ -41,6 +41,7 @@ jobs:
     requires: [~commit, hotfix_release]
 
   bucket_1_ui:
+    <<: *e2e_test_ui
     steps:
         - fail-maybe: if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
 
