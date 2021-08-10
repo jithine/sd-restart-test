@@ -12,10 +12,12 @@ shared:
   image: node:12
   steps:
         - nothing: echo 'nothing'
+        - sleep: sleep $SLEEP_TIME
   environment:
     USER_SHELL_BIN: "/bin/bash"
     SD_ZIP_ARTIFACTS: false
     SD_COVERAGE_PLUGIN_ENABLED: false
+    SLEEP_TIME: 15
 
   annotations:
     screwdriver.cd/collapseBuilds: false
@@ -42,6 +44,8 @@ jobs:
 
   bucket_1_ui:
     <<: *e2e_test_ui
+    environment:
+      SLEEP_TIME: 5
     steps:
         - fail-maybe: if [ "$(meta get parameters.az.value)" -eq "1" ]; then false; else true; fi 
 
