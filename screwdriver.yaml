@@ -34,7 +34,7 @@ jobs:
   lint:
     requires: [~commit, ~hotfix_release]
     steps:
-      - sleep: 20
+      - sleep: sleep 20
 
   build_test:
     environment:
