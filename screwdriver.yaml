@@ -34,12 +34,14 @@ jobs:
   lint:
     requires: [~commit, ~hotfix_release]
     steps:
-      - sleep: sleep 60
+      - sleep: sleep 10
 
   build_test:
     environment:
       SD_COVERAGE_PLUGIN_ENABLED: true
     requires: [~commit, ~hotfix_release]
+    steps:
+      - sleep: sleep 200
 
   component_build_deploy_publish:
     requires: [~commit, hotfix_release]
