@@ -2,7 +2,7 @@ annotations:
   screwdriver.cd/chainPR : true
 
 parameters:
-    user: "jithine"
+    user: "jithine 1"
     region: "us-west-1"
     az:
         value: "1"
